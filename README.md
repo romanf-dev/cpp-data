@@ -70,6 +70,10 @@ File descriptions
 - node.hpp: implementation of constexpr constructors for structs in node.h
 - parser.c: binary data parser implemented in pure C for integration into a FW
 - gnu.ld: Linked script for GCC to extract data sections
+- build.sh: Script for building binary data image
+- cppdata.h: API for firmware side code
+- example_data.cpp: Sample binary data
+- example_parser.c: Example how to use parser API
 
 
                              ----------
