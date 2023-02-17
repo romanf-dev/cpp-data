@@ -59,9 +59,9 @@ types, much easier than make modifications to binary json or something like
 this. Note that while it is somewhat unusual use of the langauge it is still 
 C++, so all of the language features are ready to use.
 
-Good: simple extensible cross-platform binary storage
-Bad: requires at least C++17 to build binary data image
-Ugly: every linker needs its own script to extract data section from the ELF
+- Good: simple extensible cross-platform binary storage
+- Bad: requires at least C++17 to build binary data image
+- Ugly: every linker needs its own script to extract data section from the ELF
 
 File descriptions
 -----------------
@@ -76,32 +76,37 @@ File descriptions
 - example_parser.c: Example how to use parser API
 
 
-                                ----------
+
+
+                               ----------
             -------------------| node.h |-------------------
             |                  ----------                  |
             |                                              |
             V                                              V
         ---------------                             ------------------------
-        | node.hpp    |                             | parser.c             |
+        |  node.hpp   |                             |       parser.c       |
         ---------------                             ------------------------
             |                                              |
             |                                              |
             V                                              V
         ---------------     FS-like data access     ------------------------
-        | binary data | <-------------------------> | firmware image       |
+        | binary data | <-------------------------> |    firmware image    |
         ---------------                             ------------------------
 
-Building
---------
+Build & test
+------------
 
 To build example binary data file use:
 
     ./build.sh example_data.cpp
 
+It yields cppdata.bin file.
+
 To build example parser use:
 
     gcc -o test example_parser.c parser.c
 
+It results in test executable.
+Run the following command to print directory structure:
 
-
-
+    ./test cppdata.bin

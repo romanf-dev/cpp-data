@@ -13,28 +13,28 @@
 static void print_dirs(
     const struct cppd_t* handle, 
     const struct Node* node, 
-    unsigned int level) {
-
+    unsigned int level) 
+{
     struct cppd_dirent_t de;
 
-    for (unsigned int i = 0;; ++i) {
-
-        if (!cppd_readdir(handle, node, i, &de)) {
-
-            for (unsigned int t = 0; t < level; ++t) {
-
+    for (unsigned int i = 0;; ++i) 
+    {
+        if (!cppd_readdir(handle, node, i, &de)) 
+        {
+            for (unsigned int t = 0; t < level; ++t) 
+            {
                 printf("\t");
             }
 
             printf("%s (%d)\r\n", de.name, de.type);
 
-            if (de.type == 0) { /* type 0 means folder */
-
+            if (de.type == 0) /* type 0 means folder */ 
+            { 
                 print_dirs(handle, de.data, level + 1);
             }
-
-        } else {
-
+        } 
+        else 
+        {
             break;
         }
     }
@@ -43,11 +43,18 @@ static void print_dirs(
 int main(int argc, const char *argv[])
 {
     static uint64_t buf[1000];
+
+    if (argc < 2)
+    {
+        perror("Please specify input file");
+        return EXIT_FAILURE;
+    }
+
     const char* fname = argv[1];
     FILE* const fp = fopen(fname, "rb");
 
-    if (!fp) {
-
+    if (!fp) 
+    {
         perror("File opening failed");
         return EXIT_FAILURE;
     }
@@ -56,8 +63,8 @@ int main(int argc, const char *argv[])
     const size_t siz = ftell(fp);
     rewind(fp);
 
-    if (siz > sizeof(buf)) {
-
+    if (siz > sizeof(buf)) 
+    {
         perror("Too big binary data file.");
         return EXIT_FAILURE;
     }
@@ -67,18 +74,17 @@ int main(int argc, const char *argv[])
     printf("Read %ld bytes\r\n", read_bytes);
     
     struct cppd_t handle;
-    int error = cppd_init(&handle, buf);
 
-    if(error) {
-
+    if (cppd_init(&handle, buf)) 
+    {
         perror("Wrong binary data file.");
         return EXIT_FAILURE;
     }
 
     const struct Node* node = cppd_open(&handle, "/");
     print_dirs(&handle, node, 0);
-
     fclose(fp);
+
     return EXIT_SUCCESS;
 }
 

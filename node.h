@@ -93,5 +93,10 @@ struct Node
 
 };
 
+enum
+{
+    SizeOfNode = 24,
+};
+
 #endif
 

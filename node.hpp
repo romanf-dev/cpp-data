@@ -35,6 +35,8 @@
 
 #include "node.h"
 
+static_assert(sizeof(Node) == SizeOfNode);
+
 template<typename T> constexpr _NodePayload::_NodePayload(const T* p)
     :
     ptr(static_cast<const void*>(p)) 
