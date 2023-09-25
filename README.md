@@ -1,16 +1,17 @@
-Cpp_data
-========
+Modern C++ as binary data compiler
+==================================
+
 
 Description
 -----------
 
-Embedded systems often need some external configuration data which are not 
+Embedded systems often need some external configuration data which do not 
 reside inside a firmware image, so both the firmware and the configuration may 
-be changed independently. Examples of such a configuration data are windows 
-registry or linux device tree. While text files are good enough in most cases, 
+be changed independently. Examples of such a configuration data are Windows 
+registry or Linux device tree. While text files are good enough in most cases, 
 parser implementation may be too complex comparing to one for binary formats. 
 
-Many systems reinvent the wheel by creating its own configuration data 
+Many systems reinvent the wheel by creating their own configuration data 
 descriptions, compilers and parsers. This project is an yet another such 
 attempt to create a simple and extensible configuration ROM-able FS-like 
 storage in pure C++. The goal is to write configuration in human-readable 
@@ -36,7 +37,7 @@ any user-defined types, they are just arrays of any data. Example:
     };
 
 foo is a folder containing two nodes, first is a number and second is a string. 
-Now add some hierarchy and blob:
+Now add some hierarchy and a blob:
 
     constexpr unsigned int bin_data[] = {1,2,3,4,5};
 
@@ -47,7 +48,7 @@ Now add some hierarchy and blob:
     };
 
 Now you may read 42 by name “/child_folder/my_number”. It is not designed to 
-manage large hierarchies of billions of entries (like registry). Keys are 
+hold large hierarchies of billions of entries (like registry). Keys are 
 compared one by one with linear search, no tree, no hash and so on. But it is 
 good and simple solution for not so complex embedded systems with reasonable 
 number of entries. Remember that under the hood it is just C-arrays, so don’t 
@@ -55,13 +56,10 @@ expect any magic.
 
 Why use it? If you use C++ you need no extra tools to build both your code and 
 its configuration. No need to learn new syntax. It is easy to add custom data 
-types, much easier than make modifications to binary json or something like 
+types, much easier than make modifications to binary JSON or something like 
 this. Note that while it is somewhat unusual use of the langauge it is still 
 C++, so all of the language features are ready to use.
 
-- Good: simple extensible cross-platform binary storage
-- Bad: requires at least C++17 to build binary data image
-- Ugly: every linker needs its own script to extract data section from the ELF
 
 File descriptions
 -----------------
@@ -74,7 +72,6 @@ File descriptions
 - cppdata.h: API for firmware side code
 - example_data.cpp: Sample binary data
 - example_parser.c: Example how to use parser API
-
 
 
 
