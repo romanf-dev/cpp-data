@@ -34,32 +34,38 @@
 
 _Static_assert(sizeof(struct Node) == SizeOfNode, "Wrong node sizeof!");
 
-struct substring_t
-{
+struct substring_t {
     const char* ptr;
     size_t size;
 };
+
+static inline enum cppd_entry_type_t translate_type(enum NodeType inner_type) {
+    static const enum cppd_entry_type_t lookup_table[] = {
+        [Folder] = CPPD_FOLDER,
+        [Number] = CPPD_NUMBER,
+        [String] = CPPD_STRING,
+        [Blob] = CPPD_BLOB,
+    };
+
+    return lookup_table[inner_type];
+}
 
 //
 // Since binary data contains only offsets it is required to add base
 // to them to get valid pointers.
 //
-static inline const void* to_ptr(const struct cppd_t* handle, size_t offset) 
-{
+static inline const void* to_ptr(const struct cppd_t* handle, size_t offset) {
     return (handle->base + offset);
 }
 
 //
 // Compares whether the first n symbols of s1 and s2 are equal.
 //
-static inline bool str_equal(const char* s1, const char* s2, size_t n) 
-{
+static inline bool str_equal(const char* s1, const char* s2, size_t n) {
     bool equal = true;
 
-    for (size_t i = 0; i < n; ++i) 
-    {
-        if (s1[i] != s2[i]) 
-        {
+    for (size_t i = 0; i < n; ++i) {
+        if (s1[i] != s2[i]) {
             equal = false;
             break;
         }
@@ -72,19 +78,16 @@ static inline bool str_equal(const char* s1, const char* s2, size_t n)
 // Extracts next path item from string like /first/second/foo/bar.
 // Returns pointer to first symbol and length. Source string is not modified.
 //
-static inline bool next_path_item(const char* s, struct substring_t* out) 
-{
+static inline bool next_path_item(const char* s, struct substring_t* out) {
     size_t i = 0;
     
-    if (*s == '/') 
-    { 
+    if (*s == '/') { 
         ++s;
     }
 
-    if (*s != '\0') 
-    {
-        while ((s[i] != 0) && (s[i] != '/')) 
-        { 
+    if (*s != '\0') {
+        
+        while ((s[i] != 0) && (s[i] != '/')) { 
             ++i; 
         }
 
@@ -102,22 +105,20 @@ static inline bool next_path_item(const char* s, struct substring_t* out)
 static const struct Node* lookup(
     const struct cppd_t* handle, 
     const struct Node* folder, 
-    const struct substring_t* item) 
-{   
+    const struct substring_t* item) {
+        
     const struct Node* const folder_content = to_ptr(
         handle, 
         folder->payload.val
     );
 
-    for (size_t i = 0; i < folder->type.len; ++i) 
-    {
+    for (size_t i = 0; i < folder->type.len; ++i) {
         const char* const name = to_ptr(
             handle, 
             (uintptr_t) folder_content[i].name
         );
 
-        if (str_equal(name, item->ptr, item->size)) 
-        {
+        if (str_equal(name, item->ptr, item->size)) {
             return &folder_content[i];
         }
     }
@@ -129,13 +130,11 @@ static const struct Node* lookup(
 // Validates user buffer and creates a handle to access binary storage.
 // Return 0 on success.
 //
-int cppd_init(struct cppd_t* handle, const void* buffer) 
-{
+int cppd_init(struct cppd_t* handle, const void* buffer) {
     int error = 1;
     const uint64_t* const header = buffer;
 
-    if (*header == 0xcafebabe) 
-    {
+    if (*header == 0xcafebabe) {
         handle->base = buffer;
         handle->root_node = (const void*)(handle->base + header[1]);
         error = 0;
@@ -147,24 +146,42 @@ int cppd_init(struct cppd_t* handle, const void* buffer)
 //
 // Returns pointer to node correspoinding to given path or NULL.
 //
-const struct Node* cppd_open(const struct cppd_t* handle, const char* path) 
-{
+const struct Node* cppd_open(const struct cppd_t* handle, const char* path) {
     size_t offset = 0;
     struct substring_t part;
     const struct Node* folder = handle->root_node;
 
-    while (next_path_item(path + offset, &part)) 
-    {
+    while (next_path_item(path + offset, &part)) {
         offset += part.size + 1;
         folder = lookup(handle, folder, &part);
 
-        if (folder == (void*)0)
-        {
+        if (folder == (void*)0) {
             break;
         }
     }
 
     return folder;
+}
+
+//
+// Returns pointer to data.
+//
+const void* cppd_dataptr(const struct cppd_t* handle, const struct Node* node, size_t* len) {
+    size_t datasize = 0;
+
+    if (node->type.id != Folder) {
+        const void* const data = (node->type.id == Number) ?
+            &(node->payload.num) :
+            to_ptr(handle, node->payload.val);
+
+        if (len) {
+            *len = node->type.len * node->type.sz;
+        }
+
+        return data;
+    }
+
+    return 0;
 }
 
 //
@@ -175,24 +192,17 @@ size_t cppd_read(
     const struct cppd_t* handle, 
     const struct Node* node, 
     void* buffer, 
-    size_t len) 
-{  
+    size_t len) {  
+        
     size_t datasize = 0;
+    const void* const ptr = cppd_dataptr(handle, node, &datasize);
 
-    if (node->type.id != Folder) 
-    {
-        const void* const data = (node->type.id == Number) ? 
-            &(node->payload.num) :
-            to_ptr(handle, node->payload.val);
-
-        if (len >= (node->type.len * node->type.sz)) 
-        {
-            datasize = node->type.len * node->type.sz;
-            memcpy(buffer, data, datasize);
-        }
+    if (ptr && len >= datasize) {
+        memcpy(buffer, ptr, datasize);
+        return datasize;
     }
 
-    return datasize;
+    return 0;
 }
 
 //
@@ -202,18 +212,17 @@ int cppd_readdir(
     const struct cppd_t* handle, 
     const struct Node* node, 
     size_t index, 
-    struct cppd_dirent_t* dirent) 
-{
+    struct cppd_dirent_t* dirent) {
+        
     int error = 1;
 
-    if ((node->type.id == Folder) && (index < node->type.len)) 
-    {
+    if ((node->type.id == Folder) && (index < node->type.len)) {
         const struct Node* const n = to_ptr(handle, node->payload.val);
 
         dirent->name = to_ptr(handle, (uintptr_t) n[index].name);
         dirent->data = n + index;
         dirent->size = n[index].type.sz * n[index].type.len;
-        dirent->type = n[index].type.id;
+        dirent->type = translate_type(n[index].type.id);
         error = 0;
     }
 

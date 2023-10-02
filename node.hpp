@@ -37,36 +37,23 @@
 
 static_assert(sizeof(Node) == SizeOfNode);
 
-template<typename T> constexpr _NodePayload::_NodePayload(const T* p)
-    :
-    ptr(static_cast<const void*>(p)) 
-{
-}
+template<typename T> constexpr _NodePayload::_NodePayload(const T* p):
+    ptr(static_cast<const void*>(p)) {}
 
-constexpr _NodePayload::_NodePayload(std::uint64_t n)
-    : 
-    num(n) 
-{
-}
+constexpr _NodePayload::_NodePayload(std::uint64_t n): 
+    num(n) {}
 
-constexpr _NodeDescriptor::_NodeDescriptor(NodeType t, size_t l, size_t s)
-    : 
-    len(l),
-    sz(s),
-    id(t) 
-{
-}
+constexpr _NodeDescriptor::_NodeDescriptor(NodeType t, size_t l, size_t s): 
+    len(l), 
+    sz(s), 
+    id(t) {}
 
-constexpr Node::Node(const std::string_view& n, uint64_t value)
-    :
+constexpr Node::Node(const std::string_view& n, uint64_t value):
     name(std::data(n)), 
     payload(value),
-    type(Number, 1, sizeof(value))
-{
-}
+    type(Number, 1, sizeof(value)) {}
 
-template<typename T> constexpr NodeType Node::TypeToId()
-{
+template<typename T> constexpr NodeType Node::TypeToId() {
     return std::is_same<T, char>::value ? 
         String :
         std::is_same<T, Node>::value ? 
@@ -74,17 +61,12 @@ template<typename T> constexpr NodeType Node::TypeToId()
             Blob;
 }
 
-template<typename T, size_t N> constexpr Node::Node(const std::string_view& n, const T (&s)[N])
-    :
+template<typename T, size_t N> constexpr Node::Node(const std::string_view& n, const T (&s)[N]):
     name(std::data(n)),
     payload(std::data(s)),
-    type(TypeToId<T>(), N, sizeof(T))
-{
-}
+    type(TypeToId<T>(), N, sizeof(T)) {}
 
 #define SET_ROOT(folder) \
     extern "C" constexpr Node root("/", (folder)); \
     static_assert(root.type.id == Folder)
-
 #endif
-

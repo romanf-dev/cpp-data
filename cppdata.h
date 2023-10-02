@@ -25,7 +25,7 @@
 //
 
 //
-// Interface to firmware-side API.
+// Interface to firmware-side C API.
 //
 
 #ifndef _CPPDATA_H_
@@ -35,16 +35,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-struct cppd_dirent_t
-{
+enum cppd_entry_type_t {
+    CPPD_FOLDER,
+    CPPD_NUMBER,
+    CPPD_STRING,
+    CPPD_BLOB
+};
+
+struct cppd_dirent_t {
     const char* name;
     const void* data;
     size_t size;
-    int type;
+    enum cppd_entry_type_t type;
 };
 
-struct cppd_t
-{
+struct cppd_t {
     const unsigned char* base;
     const void* root_node;
 };
@@ -61,6 +66,12 @@ size_t cppd_read(
     size_t len
 );
 
+const void* cppd_dataptr(
+    const struct cppd_t* handle, 
+    const struct Node* node, 
+    size_t* len
+);
+
 int cppd_readdir(
     const struct cppd_t* handle, 
     const struct Node* node, 
@@ -69,4 +80,3 @@ int cppd_readdir(
 );
 
 #endif
-

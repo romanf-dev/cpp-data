@@ -39,16 +39,14 @@
 #   include <stdint.h>
 #endif
 
-enum NodeType
-{
+enum NodeType {
     Folder,
     Number,
     String,
     Blob
 };
 
-typedef struct _NodeDescriptor
-{
+typedef struct _NodeDescriptor {
     const uint32_t len:24;
     const uint32_t sz:6;
     const uint32_t id:2;
@@ -60,8 +58,7 @@ typedef struct _NodeDescriptor
 }
 NodeDescriptor;
 
-typedef union _NodePayload
-{
+typedef union _NodePayload {
     const uint64_t num;
     const void* const ptr;
     const uintptr_t val;
@@ -77,8 +74,7 @@ NodePayload;
 //
 // This is the main building block of binary file.
 //
-struct Node
-{
+struct Node {
     const char* const name;
     const NodePayload payload;
     const NodeDescriptor type;
@@ -93,10 +89,8 @@ struct Node
 
 };
 
-enum
-{
+enum {
     SizeOfNode = 24,
 };
 
 #endif
-
