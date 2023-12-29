@@ -52,7 +52,7 @@ typedef struct _NodeDescriptor {
     const uint32_t id:2;
     
 #ifdef __cplusplus
-    constexpr _NodeDescriptor(NodeType, size_t, size_t);
+    consteval _NodeDescriptor(NodeType, size_t, size_t);
 #endif
 
 }
@@ -64,8 +64,8 @@ typedef union _NodePayload {
     const uintptr_t val;
     
 #ifdef __cplusplus
-    template<typename T> constexpr _NodePayload(const T*);
-    constexpr _NodePayload(uint64_t);
+    template<typename T> consteval _NodePayload(const T*);
+    consteval _NodePayload(uint64_t);
 #endif
 
 }
@@ -80,11 +80,11 @@ struct Node {
     const NodeDescriptor type;
     
 #ifdef __cplusplus
-    constexpr Node(const std::string_view&, uint64_t);  
-    template<typename T> static constexpr NodeType TypeToId();
+    consteval Node(const std::string_view&, uint64_t);  
+    template<typename T> static consteval NodeType TypeToId();
     template<typename T, size_t N> 
-        constexpr Node(const std::string_view&, const T (&)[N]);
-    constexpr Node() = delete;
+        consteval Node(const std::string_view&, const T (&)[N]);
+    consteval Node() = delete;
 #endif
 
 };

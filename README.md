@@ -5,11 +5,11 @@ Modern C++ as binary data compiler
 Description
 -----------
 
-Embedded systems often need some external configuration data which do not 
+Embedded systems often need some external configuration data which should not 
 reside inside a firmware image, so both the firmware and the configuration may 
 be changed independently. Examples of such a configuration data are Windows 
 registry or Linux device tree. While text files are good enough in most cases, 
-parser implementation may be too complex comparing to one for binary formats. 
+parser implementation may be too complex compared to one for binary formats. 
 
 Many systems reinvent the wheel by creating their own configuration data 
 descriptions, compilers and parsers. This project is an yet another such 
@@ -51,7 +51,7 @@ Now you may read 42 by name “/child_folder/my_number”. It is not designed to
 hold large hierarchies of billions of entries (like registry). Keys are 
 compared one by one with linear search, no tree, no hash and so on. But it is 
 good and simple solution for not so complex embedded systems with reasonable 
-number of entries. Remember that under the hood it is just C-arrays, so don’t 
+number of entries. Remember that under the hood it is just arrays, so don’t 
 expect any magic.
 
 Why use it? If you use C++ you need no extra tools to build both your code and 
@@ -65,8 +65,8 @@ File descriptions
 -----------------
 
 - node.h: common header for C and C++ part describing data items
-- node.hpp: implementation of constexpr constructors for structs in node.h
-- parser.c: binary data parser implemented in pure C for integration into a FW
+- node.hpp: implementation of consteval constructors for structs in node.h
+- parser.c: binary data parser implemented in pure C for FW integration
 - gnu.ld: Linked script for GCC to extract data sections
 - build.sh: Script for building binary data image
 - cppdata.h: API for firmware side code

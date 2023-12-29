@@ -25,7 +25,7 @@
 //
 
 //
-// Implementations of constexpr constructors for various types of nodes.
+// Implementations of consteval constructors for various types of nodes.
 // It currently requires C++17 because of string_view, but may be tuned
 // down to C++11 with some modifications.
 //
@@ -37,23 +37,23 @@
 
 static_assert(sizeof(Node) == SizeOfNode);
 
-template<typename T> constexpr _NodePayload::_NodePayload(const T* p):
+template<typename T> consteval _NodePayload::_NodePayload(const T* p):
     ptr(static_cast<const void*>(p)) {}
 
-constexpr _NodePayload::_NodePayload(std::uint64_t n): 
+consteval _NodePayload::_NodePayload(std::uint64_t n): 
     num(n) {}
 
-constexpr _NodeDescriptor::_NodeDescriptor(NodeType t, size_t l, size_t s): 
+consteval _NodeDescriptor::_NodeDescriptor(NodeType t, size_t l, size_t s): 
     len(l), 
     sz(s), 
     id(t) {}
 
-constexpr Node::Node(const std::string_view& n, uint64_t value):
+consteval Node::Node(const std::string_view& n, uint64_t value):
     name(std::data(n)), 
     payload(value),
     type(Number, 1, sizeof(value)) {}
 
-template<typename T> constexpr NodeType Node::TypeToId() {
+template<typename T> consteval NodeType Node::TypeToId() {
     return std::is_same<T, char>::value ? 
         String :
         std::is_same<T, Node>::value ? 
@@ -61,7 +61,7 @@ template<typename T> constexpr NodeType Node::TypeToId() {
             Blob;
 }
 
-template<typename T, size_t N> constexpr Node::Node(const std::string_view& n, const T (&s)[N]):
+template<typename T, size_t N> consteval Node::Node(const std::string_view& n, const T (&s)[N]):
     name(std::data(n)),
     payload(std::data(s)),
     type(TypeToId<T>(), N, sizeof(T)) {}
